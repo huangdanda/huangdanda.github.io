@@ -211,30 +211,32 @@ function fmtYi(v){
   return v.toFixed(2)+'亿';
 }
 function balChartSvg(items){
-  const rows=[
-    ['货币资金','a', items['货币资金']??0],
-    ['应收账款','a', items['应收账款']??0],
-    ['存货','a', items['存货']??0],
-    ['固定资产','a', items['固定资产']??0],
-    ['有息负债','l', (items['短期借款']??0)+(items['长期借款']??0)],
-    ['总负债','l', items['总负债']??0],
-    ['股东权益','e', items['股东权益']??0],
+  const hasBorrow = items['短期借款']!=null || items['长期借款']!=null;
+  const raw = [
+    ['货币资金','现金','a', items['货币资金']],
+    ['应收账款','应收','a', items['应收账款']],
+    ['存货','存货','a', items['存货']],
+    ['固定资产','固资','a', items['固定资产']],
+    ['有息负债','有息债','l', hasBorrow ? (items['短期借款']||0)+(items['长期借款']||0) : null],
+    ['总负债','总负债','l', items['总负债']],
+    ['股东权益','净资产','e', items['股东权益']],
   ];
+  const rows = raw.filter(r => r[3]!=null && r[3]>=0);
   const col={a:C.blue, l:C.orange, e:'#1baf7a'};
-  const vals=rows.map(r=>r[2]);
-  const max=niceMax(Math.max(...vals)*1.15);
-  const W=540,L=84,Wb=W-L-58,H=rows.length*32+22,h=20;
-  const Ytop=12, ph=H-34;
-  const Y=v=>Ytop+ph-(v/max)*ph;
-  let s=`<svg viewBox="0 0 ${W} ${H}" role="img">`;
-  for(let g=0;g<=4;g++){const v=max/4*g; s+=`<line class="grid-line" x1="${L}" y1="${Y(v)}" x2="${L+Wb}" y2="${Y(v)}"/>`;
-    s+=`<text class="axis-label" x="${L-6}" y="${Y(v)+4}" text-anchor="end">${v>=10000?(v/10000).toFixed(0)+'万亿':Math.round(v)}</text>`;}
+  const vals = rows.map(r=>r[3]);
+  const max = niceMax(Math.max(...vals)*1.15);
+  const W=540, pl=46, pr=12, pt=26, pb=44, pw=W-pl-pr, ph=280-pt-pb;
+  const Y = v => pt+ph-(v/max)*ph;
+  const bw = pw/rows.length;
+  const barW = Math.min(34, bw*0.52);
+  let s=`<svg viewBox="0 0 ${W} 280" role="img">`;
+  for(let g=0;g<=4;g++){const v=max/4*g; s+=`<line class="grid-line" x1="${pl}" y1="${Y(v)}" x2="${pl+pw}" y2="${Y(v)}"/>`;
+    s+=`<text class="axis-label" x="${pl-5}" y="${Y(v)+4}" text-anchor="end">${v>=10000?(v/10000).toFixed(0)+'万亿':Math.round(v)}</text>`;}
   rows.forEach((r,i)=>{
-    const v=r[2], y=Ytop+i*32;
-    s+=`<text class="sector-name" x="${L-6}" y="${y+15}" text-anchor="end">${r[0]}</text>`;
-    const w=v/max*Wb;
-    s+=`<rect x="${L}" y="${y}" width="${Math.max(v>0?1.5:0,w).toFixed(1)}" height="${h}" rx="3" fill="${col[r[1]]}"><title>${r[0]} ${fmtYi(v)}</title></rect>`;
-    s+=`<text class="val-label" x="${L+w+6}" y="${y+15}">${fmtYi(v)}</text>`;
+    const v=r[3], cx=pl+bw*i+bw/2, h=v/max*ph;
+    s+=`<rect x="${cx-barW/2}" y="${Y(v)}" width="${barW}" height="${Math.max(v>0?2:0,h).toFixed(1)}" rx="3" fill="${col[r[2]]}"><title>${r[0]} ${fmtYi(v)}</title></rect>`;
+    s+=`<text class="val-label" x="${cx}" y="${Y(v)-6}" text-anchor="middle">${fmtYi(v)}</text>`;
+    s+=`<text class="axis-label" x="${cx}" y="${pt+ph+13}" text-anchor="middle">${r[1]}</text>`;
   });
   s+=`</svg>`;
   return s;
@@ -308,9 +310,9 @@ function render(d){
       </tbody></table></div></div>
 
   <div class="card"><h3>资产负债表（近5年，可切换年份）</h3>
-    <p class="desc">柱状图对比各科目规模：蓝=资产、橙=负债、青=股东权益，有息负债=短期+长期借款。点按钮切换年份。注：银行/保险资产负债表科目特殊，货币资金、存货等显示为0系口径差异，不代表无现金。</p>
+    <p class="desc">竖柱图（指标在X轴）：蓝=资产、橙=负债、青=净资产。现金=货币资金、应收=应收账款、固资=固定资产、有息债=短期+长期借款。无数据的科目自动隐藏。点按钮切换年份。</p>
     <div class="balnav"><button class="balbtn" onclick="balStep(-1)">◀ 上一年</button><span class="balyear" id="bal-year"></span><button class="balbtn" onclick="balStep(1)">下一年 ▶</button></div>
-    <div class="legend"><span><span class="sw" style="background:var(--blue)"></span>资产</span><span><span class="sw" style="background:var(--orange)"></span>负债</span><span><span class="sw" style="background:#1baf7a"></span>股东权益</span></div>
+    <div class="legend"><span><span class="sw" style="background:var(--blue)"></span>资产</span><span><span class="sw" style="background:var(--orange)"></span>负债</span><span><span class="sw" style="background:#1baf7a"></span>净资产</span></div>
     <div class="chart-scroll"><div class="inner"><div id="bal-chart"></div></div></div></div>
 
   <div class="card"><h3>分析</h3><div class="analysis">
