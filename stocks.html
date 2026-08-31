@@ -114,17 +114,18 @@ function niceMax(v){ if(v<=0)return 1; const p=Math.pow(10,Math.floor(Math.log10
 
 function firstLast(arr){ const a=arr.map((v,i)=>v==null?null:[v,YEARS[i]]).filter(x=>x); return [a[0],a[a.length-1]]; }
 
-function grouped(el,{series,yMax,unit}){
+function grouped(el,{series,yMax,unit,years}){
+  years=years||YEARS;
   const W=620,pl=50,pr=10,pt=14,pb=34,pw=W-pl-pr,ph=300-pt-pb;
   const Y=v=>pt+ph-(v/yMax)*ph;
   let s=`<svg viewBox="0 0 ${W} 300" role="img">`;
   for(let g=0;g<=4;g++){const v=yMax/4*g; s+=`<line class="grid-line" x1="${pl}" y1="${Y(v)}" x2="${pl+pw}" y2="${Y(v)}"/>`;
     s+=`<text class="axis-label" x="${pl-6}" y="${Y(v)+4}" text-anchor="end">${v>=1000?(v/1000).toFixed(1)+'k':Math.round(v)}</text>`;}
-  const bw=pw/YEARS.length, barW=Math.min(22,bw*0.34), gap=barW+3;
+  const bw=pw/years.length, barW=Math.min(22,bw*0.34), gap=barW+3;
   series.forEach((sr,si)=>{ const off=(si-(series.length-1)/2)*gap;
     sr.data.forEach((v,i)=>{ if(v==null)return; const cx=pl+bw*i+bw/2+off, h=v/yMax*ph;
-      s+=`<rect x="${cx-barW/2}" y="${Y(v)}" width="${barW}" height="${Math.max(2,h.toFixed(1))}" rx="3" fill="${sr.color}"><title>${sr.name} ${YEARS[i]}: ${v}${unit}</title></rect>`;});});
-  YEARS.forEach((y,i)=>{ s+=`<text class="yr-label" x="${pl+bw*i+bw/2}" y="${pt+ph+15}" text-anchor="middle">'${String(y).slice(2)}</text>`;});
+      s+=`<rect x="${cx-barW/2}" y="${Y(v)}" width="${barW}" height="${Math.max(2,h.toFixed(1))}" rx="3" fill="${sr.color}"><title>${sr.name} ${years[i]}: ${v}${unit}</title></rect>`;});});
+  years.forEach((y,i)=>{ s+=`<text class="yr-label" x="${pl+bw*i+bw/2}" y="${pt+ph+15}" text-anchor="middle">'${String(y).slice(2)}</text>`;});
   s+=`<text class="axis-label" x="${pl-8}" y="${pt-2}" text-anchor="end">${unit}</text></svg>`;
   el.innerHTML=s;
 }
@@ -320,7 +321,7 @@ function render(d){
   peHist(document.getElementById('c2'), d);
   lines(document.getElementById('c3'),{yMax:niceMax(Math.max(...d.roe.filter(v=>v!=null))*1.15),
     series:[{name:'ROE',color:C.blue,data:d.roe}]});
-  grouped(document.getElementById('c4'),{yMax:cfMax,unit:'亿',
+  grouped(document.getElementById('c4'),{yMax:cfMax,unit:'亿',years:last3,
     series:[{name:'经营现金流',color:C.blue,data:ocf3},{name:'净利润',color:C.orange,data:np3}]});
   lines(document.getElementById('c5'),{yMax:niceMax(Math.max(...d.rev.filter(v=>v!=null),...d.ocf.filter(v=>v!=null))*1.1),
     series:[{name:'营业收入',color:C.blue,data:d.rev},{name:'经营现金流',color:C.orange,data:d.ocf}]});
