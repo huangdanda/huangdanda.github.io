@@ -370,6 +370,14 @@ function render(d){
     <div class="kpi"><div class="lbl">评级</div><div class="num" style="color:var(--good)">${rateTxt}</div></div>
   </div>
 
+  <div class="card"><h3>分析</h3><div class="analysis">
+    <p><b>① 业绩：</b>营收 ${fRev[0]}亿(${fRev[1]})→${lRev[0]}亿(${lRev[1]})，净利 ${fNp[0]}亿(${fNp[1]})→${lNp[0]}亿(${lNp[1]})，复合增速 ${d.cagr??'—'}%；最新净利增速 ${d.latest_g==null?'—':(d.latest_g>0?'+':'')+d.latest_g}%。</p>
+    <p><b>② 估值：</b>当前 PE ${d.curPE??'—'} 倍，处历史 ${d.curPct??'—'}% 分位，属<b>${pState}</b>；历史合理区间约 ${d.p30??'—'}–${d.p70??'—'} 倍。</p>
+    <p><b>③ 质量：</b>ROE 均值 ${d.roe_avg??'—'}%、净现比 ${d.ncr??'—'}（利润转现金的能力）。</p>
+    <p><b>④ 逻辑：</b>${d.logic}</p>
+    <div class="concl"><b>增长潜力：</b>${d.growth}<br><b>主要风险：</b>${d.risk}</div>
+  </div></div>
+
   <div class="card"><h3>营业收入 vs 市盈率（估值合理性）</h3>
     <p class="desc">左轴＝营业收入（柱，亿元），右轴＝市盈率（线，倍）。看营收增长的同时，估值是同步抬升还是提前透支/回落。</p>
     <div class="legend"><span><span class="sw" style="background:var(--blue)"></span>营业收入</span><span><span class="sw line" style="background:var(--orange)"></span>市盈率(年均)</span></div>
@@ -457,15 +465,7 @@ function render(d){
     <p class="desc">单年度资产负债表结构：X轴为各科目，<b>蓝柱=资产（正向现金）</b>、<b>红柱=负债（负向现金）</b>，右上角为当期年度。<b>现金类=货币资金+拆出资金+其他流动资产</b>（含定期存款/理财）。点按钮切换上一年/下一年。</p>
     <div class="balnav"><button class="balbtn" onclick="balStep(-1)">◀ 上一年</button><button class="balbtn" onclick="balStep(1)">下一年 ▶</button></div>
     <div class="legend"><span><span class="sw" style="background:var(--blue)"></span>资产（正向现金）</span><span><span class="sw" style="background:var(--red)"></span>负债（负向现金）</span></div>
-    <div class="chart-scroll"><div class="inner"><div id="bal-chart"></div></div></div></div>
-
-  <div class="card"><h3>分析</h3><div class="analysis">
-    <p><b>① 业绩：</b>营收 ${fRev[0]}亿(${fRev[1]})→${lRev[0]}亿(${lRev[1]})，净利 ${fNp[0]}亿(${fNp[1]})→${lNp[0]}亿(${lNp[1]})，复合增速 ${d.cagr??'—'}%；最新净利增速 ${d.latest_g==null?'—':(d.latest_g>0?'+':'')+d.latest_g}%。</p>
-    <p><b>② 估值：</b>当前 PE ${d.curPE??'—'} 倍，处历史 ${d.curPct??'—'}% 分位，属<b>${pState}</b>；历史合理区间约 ${d.p30??'—'}–${d.p70??'—'} 倍。</p>
-    <p><b>③ 质量：</b>ROE 均值 ${d.roe_avg??'—'}%、净现比 ${d.ncr??'—'}（利润转现金的能力）。</p>
-    <p><b>④ 逻辑：</b>${d.logic}</p>
-    <div class="concl"><b>增长潜力：</b>${d.growth}<br><b>主要风险：</b>${d.risk}</div>
-  </div></div>`;
+    <div class="chart-scroll"><div class="inner"><div id="bal-chart"></div></div></div></div>`;
 
   document.getElementById('content').innerHTML=h;
   dual(document.getElementById('c0'),{
